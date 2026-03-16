@@ -15,7 +15,6 @@ CONFIG = {
     "location": "US",
     "dataset": "manga_analytics",
     "benchmarks_dataset": "manga_analytics_benchmarks",
-    "raw_file": "data/raw/manga.csv",
     "results_file": "dbt/seeds/benchmark_results.csv",
     "runs_per_variant": 3,
     "dbt_dir": "dbt",
@@ -251,109 +250,6 @@ def run_test_partitioning(client: bigquery.Client) -> list:
             "row_count": count_rows_in_table(client, part_fqn),
             "measured_at": datetime.now(timezone.utc).isoformat(),
         })
-
-    return results
-
-
-def split_csv(raw_path: str, output_path: str, n_rows: int) -> None:
-    with open(raw_path, "r", encoding="utf-8") as src:
-        reader = csv.reader(src)
-        header = next(reader)
-        rows = []
-        for i, row in enumerate(reader):
-            if i >= n_rows:
-                break
-            rows.append(row)
-
-    with open(output_path, "w", encoding="utf-8", newline="") as dst:
-        writer = csv.writer(dst)
-        writer.writerow(header)
-        writer.writerows(rows)
-
-    logger.info(f"split CSV: {len(rows)} rows written to {output_path}")
-
-
-def load_csv_to_table(
-    client: bigquery.Client,
-    csv_path: str,
-    table_fqn: str,
-    write_disposition: str,
-) -> str:
-    job_config = bigquery.LoadJobConfig(
-        source_format=bigquery.SourceFormat.CSV,
-        skip_leading_rows=1,
-        autodetect=True,
-        write_disposition=write_disposition,
-        allow_quoted_newlines=True,
-        allow_jagged_rows=True,
-    )
-    with open(csv_path, "rb") as f:
-        job = client.load_table_from_file(f, table_fqn, job_config=job_config)
-    job.result()
-    return job.job_id
-
-
-def run_merge_query(client: bigquery.Client, target_fqn: str, staging_fqn: str) -> str:
-    merge_sql = f"""
-    MERGE `{target_fqn}` AS target
-    USING `{staging_fqn}` AS source
-    ON target.manga_id = source.manga_id
-    WHEN NOT MATCHED THEN
-        INSERT ROW
-    """
-    job_config = bigquery.QueryJobConfig(
-        use_query_cache=False,
-        labels={"benchmark": "true", "test_name": "ingestion", "variant": "incremental"},
-    )
-    job = client.query(merge_sql, job_config=job_config)
-    job.result()
-    return job.job_id
-
-
-def run_test_ingestion(client: bigquery.Client) -> list:
-    project = CONFIG["project_id"]
-    results = []
-
-    bench_table = f"{project}.{CONFIG['benchmarks_dataset']}.manga_bronze_bench"
-    staging_table = f"{project}.{CONFIG['benchmarks_dataset']}.manga_bronze_staging"
-    partial_csv = "data/raw/manga_partial.csv"
-
-    split_csv(CONFIG["raw_file"], partial_csv, 60000)
-
-    for run in range(1, CONFIG["runs_per_variant"] + 1):
-        logger.info(f"ingestion — full truncate run {run}")
-        job_id = load_csv_to_table(
-            client, CONFIG["raw_file"], bench_table, "WRITE_TRUNCATE"
-        )
-        metrics = get_job_metrics(client, job_id)
-        results.append({
-            "test_name": "ingestion",
-            "variant": "full_truncate",
-            "run_number": run,
-            **metrics,
-            "row_count": count_rows_in_table(client, bench_table),
-            "measured_at": datetime.now(timezone.utc).isoformat(),
-        })
-
-        logger.info(f"ingestion — incremental merge run {run}")
-        load_csv_to_table(client, partial_csv, bench_table, "WRITE_TRUNCATE")
-        load_csv_to_table(client, CONFIG["raw_file"], staging_table, "WRITE_TRUNCATE")
-        merge_job_id = run_merge_query(client, bench_table, staging_table)
-        merge_metrics = get_job_metrics(client, merge_job_id)
-        results.append({
-            "test_name": "ingestion",
-            "variant": "incremental_merge",
-            "run_number": run,
-            **merge_metrics,
-            "row_count": count_rows_in_table(client, bench_table),
-            "measured_at": datetime.now(timezone.utc).isoformat(),
-        })
-
-    try:
-        os.remove(partial_csv)
-        logger.info(f"cleaned up {partial_csv}")
-    except OSError:
-        pass
 
     return results
 
