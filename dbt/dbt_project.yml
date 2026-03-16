@@ -21,3 +21,6 @@ models:
     marts:
       +materialized: table
       +schema: marts
+    benchmarks:
+      +materialized: table
+      +schema: benchmarks
