@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: manga_analytics
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
+    schema: manga_analytics
+    tables:
+      - name: manga_bronze
+        description: Raw manga data loaded from CSV via fetch_raw.py
+
+models:
+  - name: stg_manga_clean
+    description: Cleaned and type-cast manga data from bronze layer
+    columns:
+      - name: manga_id
+        description: Unique manga identifier
+        tests:
+          - not_null
+          - unique
+      - name: title
+        description: Primary title
+        tests:
+          - not_null
+      - name: score
+        description: MAL community score (1–10); NULL if unscored
+      - name: members
+        description: Number of MAL users who added this title to their list
+      - name: status
+        description: Publication status (Finished, Publishing, etc.)
+      - name: start_date
+        description: First publication date

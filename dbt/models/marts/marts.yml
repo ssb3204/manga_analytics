@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: fct_manga
+    description: Fact table — one row per manga title with dimension foreign keys
+    columns:
+      - name: manga_id
+        description: Primary key
+        tests:
+          - not_null
+          - unique
+      - name: title
+        description: Primary title
+        tests:
+          - not_null
+      - name: status_key
+        description: FK to dim_status
+  - name: dim_status
+    description: Dimension table — manga publication statuses
+    columns:
+      - name: status_key
+        description: MD5 hash of status_label
+        tests:
+          - not_null
+          - unique
+      - name: status_label
+        description: Human-readable status (Finished, Publishing, etc.)
+        tests:
+          - not_null
+
+  - name: dim_genre
+    description: Dimension table — manga genres (one row per unique genre)
+    columns:
+      - name: genre_id
+        description: MD5 hash of genre_name
+        tests:
+          - not_null
+          - unique
+      - name: genre_name
+        description: Genre label (Action, Romance, etc.)
+        tests:
+          - not_null
+
+  - name: bridge_manga_genre
+    description: Bridge table — resolves manga-to-genre many-to-many relationship
+    columns:
+      - name: manga_id
+        description: FK to fct_manga
+        tests:
+          - not_null
+      - name: genre_id
+        description: FK to dim_genre
+        tests:
+          - not_null
