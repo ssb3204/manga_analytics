@@ -1,0 +1,15 @@
+test_name,variant,run_number,bytes_scanned,slot_time_ms,execution_time_s,row_count,measured_at
+materialization_build,table,1,19820229,3740,2,64833,2026-03-16T10:45:53.147532+00:00
+materialization_query,view,1,1775935,28,0,64833,2026-03-16T10:46:02.939529+00:00
+materialization_query,table,1,1257271,38,0,64833,2026-03-16T10:46:12.134020+00:00
+materialization_query,view,2,1775935,94,0,64833,2026-03-16T10:46:21.862529+00:00
+materialization_query,table,2,1257271,27,0,64833,2026-03-16T10:46:31.308077+00:00
+materialization_query,view,3,1775935,33,0,64833,2026-03-16T10:46:41.434752+00:00
+materialization_query,table,3,1257271,43,0,64833,2026-03-16T10:46:50.864581+00:00
+partitioning_build,partitioned,1,9483418,761714,11,1961,2026-03-16T10:47:24.992959+00:00
+partitioning_query,none,1,1242207,32,0,64833,2026-03-16T10:47:34.095854+00:00
+partitioning_query,partitioned,1,0,14,0,1961,2026-03-16T10:47:43.554606+00:00
+partitioning_query,none,2,1242207,25,0,64833,2026-03-16T10:47:52.751785+00:00
+partitioning_query,partitioned,2,0,8,0,1961,2026-03-16T10:48:01.684674+00:00
+partitioning_query,none,3,1242207,29,0,64833,2026-03-16T10:48:10.888022+00:00
+partitioning_query,partitioned,3,0,7,0,1961,2026-03-16T10:48:19.891178+00:00
