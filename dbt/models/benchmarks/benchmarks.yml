@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: stg_manga_clean_table
+    description: "벤치마크: stg_manga_clean을 VIEW 대신 TABLE로 구체화한 변형"
+
+  - name: fct_manga_partitioned
+    description: "벤치마크: fct_manga에 start_date 월별 파티션 + manga_type, status_key 클러스터링 적용"
+
+  - name: fct_perf_comparison
+    description: "A/B 성능 테스트 결과 집계 — variant별 평균 bytes, slot_ms, 실행시간 비교"
