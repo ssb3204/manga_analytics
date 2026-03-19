@@ -73,4 +73,4 @@ Gold 레이어 테이블을 사용하는 분석 SQL 파일 6개:
 | member_score_correlation.sql | 회원 수 구간별 평균 점수 | fct_manga |
 | publishing_distribution.sql | 회원 수 기준 NTILE 십분위 분포 | fct_manga |
 
-> **참고:** 현재 analytics SQL 파일들은 `manga_analytics.fct_manga`를 참조하고 있으나, dbt에 의해 생성되는 실제 데이터셋 이름은 `manga_analytics_marts`임. BigQuery 콘솔에서 실행 시 데이터셋 이름을 `manga_analytics_marts`로 변경해야 함.
+> **참고:** 모든 analytics SQL 파일은 `manga_analytics_marts` 데이터셋을 참조한다.
